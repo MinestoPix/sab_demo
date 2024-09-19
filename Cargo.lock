@@ -578,21 +578,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_asset_loader",
- "bevy_kira_audio",
- "embed-resource",
- "image",
- "log",
- "rand",
- "webbrowser",
- "winit",
-]
-
-[[package]]
 name = "bevy_gilrs"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2510,8 +2495,8 @@ name = "mobile"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_game",
  "cpal",
+ "sab_demo",
 ]
 
 [[package]]
@@ -3323,6 +3308,21 @@ name = "ryu"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e86697c916019a8588c99b5fac3cead74ec0b4b819707a682fd4d23fa0ce1ba1"
+
+[[package]]
+name = "sab_demo"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_asset_loader",
+ "bevy_kira_audio",
+ "embed-resource",
+ "image",
+ "log",
+ "rand",
+ "webbrowser",
+ "winit",
+]
 
 [[package]]
 name = "same-file"
