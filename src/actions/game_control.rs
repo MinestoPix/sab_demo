@@ -5,6 +5,8 @@ pub enum GameControl {
     Down,
     Left,
     Right,
+    Confirm,
+    Exit,
 }
 
 impl GameControl {
@@ -22,6 +24,12 @@ impl GameControl {
             GameControl::Right => {
                 keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight)
             }
+            GameControl::Confirm => {
+                keyboard_input.just_pressed(KeyCode::Enter) || keyboard_input.just_pressed(KeyCode::KeyE)
+            },
+            GameControl::Exit => {
+                keyboard_input.pressed(KeyCode::KeyQ) || keyboard_input.pressed(KeyCode::Escape)
+            },
         }
     }
 }
@@ -32,4 +40,12 @@ pub fn get_movement(control: GameControl, input: &Res<ButtonInput<KeyCode>>) -> 
     } else {
         0.0
     }
+}
+
+pub fn get_exit(input: &Res<ButtonInput<KeyCode>>) -> bool {
+    GameControl::Exit.pressed(input)
+}
+
+pub fn get_confirm(input: &Res<ButtonInput<KeyCode>>) -> bool {
+    GameControl::Confirm.pressed(input)
 }

@@ -1,3 +1,4 @@
+use crate::actions::Actions;
 use crate::loading::TextureAssets;
 use crate::GameState;
 use bevy::prelude::*;
@@ -9,7 +10,13 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Menu), setup_menu)
-            .add_systems(Update, click_play_button.run_if(in_state(GameState::Menu)))
+            .add_systems(
+                Update,
+                (
+                    click_play_button.run_if(in_state(GameState::Menu)),
+                    play_on_confirm.run_if(in_state(GameState::Menu)),
+                ),
+            )
             .add_systems(OnExit(GameState::Menu), cleanup_menu);
     }
 }
@@ -218,5 +225,11 @@ fn click_play_button(
 fn cleanup_menu(mut commands: Commands, menu: Query<Entity, With<Menu>>) {
     for entity in menu.iter() {
         commands.entity(entity).despawn_recursive();
+    }
+}
+
+fn play_on_confirm(mut state: ResMut<NextState<GameState>>, actions: Res<Actions>) {
+    if actions.confirm {
+        state.set(GameState::Playing);
     }
 }

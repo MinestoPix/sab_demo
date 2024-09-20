@@ -1,5 +1,6 @@
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
+use game_control::{get_confirm, get_exit};
 
 use crate::actions::game_control::{get_movement, GameControl};
 use crate::player::Player;
@@ -17,7 +18,11 @@ impl Plugin for ActionsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Actions>().add_systems(
             Update,
-            set_movement_actions.run_if(in_state(GameState::Playing)),
+            (
+                set_movement_actions.run_if(in_state(GameState::Playing)),
+                set_confirm_actions.run_if(in_state(GameState::Menu)),
+                set_exit_actions,
+            ),
         );
     }
 }
@@ -25,6 +30,8 @@ impl Plugin for ActionsPlugin {
 #[derive(Default, Resource)]
 pub struct Actions {
     pub player_movement: Option<Vec2>,
+    pub confirm: bool,
+    pub exit: bool,
 }
 
 pub fn set_movement_actions(
@@ -57,4 +64,12 @@ pub fn set_movement_actions(
     } else {
         actions.player_movement = None;
     }
+}
+
+pub fn set_confirm_actions(mut actions: ResMut<Actions>, keyboard_input: Res<ButtonInput<KeyCode>>) {
+    actions.confirm = get_confirm(&keyboard_input);
+}
+
+pub fn set_exit_actions(mut actions: ResMut<Actions>, keyboard_input: Res<ButtonInput<KeyCode>>) {
+    actions.exit = get_exit(&keyboard_input);
 }
