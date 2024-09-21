@@ -1,6 +1,9 @@
 use crate::actions::Actions;
 use crate::loading::TextureAssets;
-use crate::style::main_menu::{get_button_style, get_button_text_style};
+use crate::style::main_menu::{
+    get_button_style, get_button_text_style, get_link_button_image_style, get_link_button_style,
+    get_link_button_text_style,
+};
 use crate::GameState;
 use bevy::prelude::*;
 
@@ -54,6 +57,13 @@ struct GameButton {
     change_state: ChangeState,
 }
 
+#[derive(Bundle)]
+struct LinkButton {
+    button_bundle: ButtonBundle,
+    button_colors: ButtonColors,
+    open_link: OpenLink,
+}
+
 impl Default for GameButton {
     fn default() -> Self {
         GameButton {
@@ -70,6 +80,51 @@ impl Default for GameButton {
 
 fn setup_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
+}
+
+impl Default for LinkButton {
+    fn default() -> Self {
+        LinkButton {
+            button_bundle: ButtonBundle {
+                style: get_link_button_style(),
+                background_color: Color::NONE.into(),
+                ..Default::default()
+            },
+            button_colors: ButtonColors {
+                normal: Color::NONE,
+                ..Default::default()
+            },
+            open_link: OpenLink("https://bevyengine.org"),
+        }
+    }
+}
+
+impl LinkButton {
+    fn link(link: &'static str) -> Self {
+        LinkButton {
+            open_link: OpenLink(link),
+            ..LinkButton::default()
+        }
+    }
+}
+
+fn spawn_link_children_txt_img(
+    children: &mut ChildBuilder<'_>,
+    link_button: LinkButton,
+    link_text: &str,
+    img_handle: Handle<Image>,
+) {
+    children.spawn(link_button).with_children(|parent| {
+        parent.spawn(TextBundle::from_section(
+            link_text,
+            get_link_button_text_style(),
+        ));
+        parent.spawn(ImageBundle {
+            image: img_handle.into(),
+            style: get_link_button_image_style(),
+            ..default()
+        });
+    });
 }
 
 fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
@@ -113,82 +168,18 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
             Menu,
         ))
         .with_children(|children| {
-            children
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(170.0),
-                            height: Val::Px(50.0),
-                            justify_content: JustifyContent::SpaceAround,
-                            align_items: AlignItems::Center,
-                            padding: UiRect::all(Val::Px(5.)),
-                            ..Default::default()
-                        },
-                        background_color: Color::NONE.into(),
-                        ..Default::default()
-                    },
-                    ButtonColors {
-                        normal: Color::NONE,
-                        ..default()
-                    },
-                    OpenLink("https://bevyengine.org"),
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Made with Bevy",
-                        TextStyle {
-                            font_size: 15.0,
-                            color: Color::linear_rgb(0.9, 0.9, 0.9),
-                            ..default()
-                        },
-                    ));
-                    parent.spawn(ImageBundle {
-                        image: textures.bevy.clone().into(),
-                        style: Style {
-                            width: Val::Px(32.),
-                            ..default()
-                        },
-                        ..default()
-                    });
-                });
-            children
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(170.0),
-                            height: Val::Px(50.0),
-                            justify_content: JustifyContent::SpaceAround,
-                            align_items: AlignItems::Center,
-                            padding: UiRect::all(Val::Px(5.)),
-                            ..default()
-                        },
-                        background_color: Color::NONE.into(),
-                        ..Default::default()
-                    },
-                    ButtonColors {
-                        normal: Color::NONE,
-                        hovered: Color::linear_rgb(0.25, 0.25, 0.25),
-                    },
-                    OpenLink("https://github.com/NiklasEi/bevy_game_template"),
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Open source",
-                        TextStyle {
-                            font_size: 15.0,
-                            color: Color::linear_rgb(0.9, 0.9, 0.9),
-                            ..default()
-                        },
-                    ));
-                    parent.spawn(ImageBundle {
-                        image: textures.github.clone().into(),
-                        style: Style {
-                            width: Val::Px(32.),
-                            ..default()
-                        },
-                        ..default()
-                    });
-                });
+            spawn_link_children_txt_img(
+                children,
+                LinkButton::default(),
+                "Made with Bevy",
+                textures.bevy.clone(),
+            );
+            spawn_link_children_txt_img(
+                children,
+                LinkButton::link("https://github.com/NiklasEi/bevy_game_template"),
+                "Bevy Engine",
+                textures.github.clone(),
+            );
         });
 }
 
