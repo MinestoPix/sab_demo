@@ -1,9 +1,11 @@
-use crate::actions::Actions;
-use crate::loading::TextureAssets;
 use super::style::main_menu::{
-    get_style_button, get_style_button_text, get_style_link_button, get_style_link_button_image,
+    get_style_button_text, get_style_container, get_style_link_button, get_style_link_button_image,
     get_style_link_button_text,
 };
+use super::{ButtonColors, ChangeState};
+use crate::actions::Actions;
+use crate::loading::TextureAssets;
+use crate::menus::GameStateButton;
 use crate::GameState;
 use bevy::prelude::*;
 
@@ -17,7 +19,7 @@ impl Plugin for MainMenuPlugin {
             .add_systems(
                 Update,
                 (
-                    click_play_button.run_if(in_state(GameState::Menu)),
+                    handler_button_click.run_if(in_state(GameState::Menu)),
                     play_on_confirm.run_if(in_state(GameState::Menu)),
                 ),
             )
@@ -26,55 +28,16 @@ impl Plugin for MainMenuPlugin {
 }
 
 #[derive(Component)]
-struct ButtonColors {
-    normal: Color,
-    hovered: Color,
-}
-
-impl Default for ButtonColors {
-    fn default() -> Self {
-        ButtonColors {
-            normal: Color::linear_rgb(0.15, 0.15, 0.15),
-            hovered: Color::linear_rgb(0.25, 0.25, 0.25),
-        }
-    }
-}
-
-#[derive(Component)]
 struct Menu;
 
 #[derive(Component)]
-struct ChangeState(GameState);
-
-#[derive(Component)]
 struct OpenLink(&'static str);
-
-#[derive(Bundle)]
-struct GameButton {
-    button_bundle: ButtonBundle,
-    button_colors: ButtonColors,
-    change_state: ChangeState,
-}
 
 #[derive(Bundle)]
 struct LinkButton {
     button_bundle: ButtonBundle,
     button_colors: ButtonColors,
     open_link: OpenLink,
-}
-
-impl Default for GameButton {
-    fn default() -> Self {
-        GameButton {
-            button_bundle: ButtonBundle {
-                style: get_style_button(),
-                background_color: ButtonColors::default().normal.into(),
-                ..Default::default()
-            },
-            button_colors: ButtonColors::default(),
-            change_state: ChangeState(GameState::Playing),
-        }
-    }
 }
 
 impl Default for LinkButton {
@@ -108,28 +71,21 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
     commands
         .spawn((
             NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
+                style: get_style_container(),
                 ..default()
             },
             Menu,
         ))
         .with_children(|children| {
             children
-                .spawn(GameButton::default())
+                .spawn(GameStateButton::default())
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section("Play", get_style_button_text()));
                 });
             children
-                .spawn(GameButton {
+                .spawn(GameStateButton {
                     change_state: ChangeState(GameState::MapGeneration),
-                    ..GameButton::default()
+                    ..GameStateButton::default()
                 })
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -170,7 +126,7 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
         });
 }
 
-fn click_play_button(
+fn handler_button_click(
     mut next_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
         (

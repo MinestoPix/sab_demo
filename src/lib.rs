@@ -4,13 +4,14 @@ mod actions;
 mod audio;
 mod debug;
 mod loading;
+mod map_gen;
 mod menus;
 mod player;
-mod style;
 
 use crate::actions::ActionsPlugin;
 use crate::audio::InternalAudioPlugin;
 use crate::loading::LoadingPlugin;
+use crate::map_gen::MapGenPlugin;
 use crate::menus::MenuPlugin;
 use crate::player::PlayerPlugin;
 
@@ -45,6 +46,7 @@ impl Plugin for GamePlugin {
             ActionsPlugin,
             InternalAudioPlugin,
             PlayerPlugin,
+            MapGenPlugin,
         ));
 
         #[cfg(debug_assertions)]
