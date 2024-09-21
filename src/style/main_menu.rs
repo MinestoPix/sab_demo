@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub fn get_button_style() -> Style {
+pub fn get_style_button() -> Style {
     Style {
         width: Val::Px(140.0),
         height: Val::Px(50.0),
@@ -10,7 +10,7 @@ pub fn get_button_style() -> Style {
     }
 }
 
-pub fn get_button_text_style() -> TextStyle {
+pub fn get_style_button_text() -> TextStyle {
     TextStyle {
         font_size: 40.0,
         color: Color::linear_rgb(0.9, 0.9, 0.9),
@@ -18,7 +18,7 @@ pub fn get_button_text_style() -> TextStyle {
     }
 }
 
-pub fn get_link_button_style() -> Style {
+pub fn get_style_link_button() -> Style {
     Style {
         width: Val::Px(170.0),
         height: Val::Px(50.0),
@@ -29,7 +29,7 @@ pub fn get_link_button_style() -> Style {
     }
 }
 
-pub fn get_link_button_text_style() -> TextStyle {
+pub fn get_style_link_button_text() -> TextStyle {
     TextStyle {
         font_size: 15.0,
         color: Color::linear_rgb(0.9, 0.9, 0.9),
@@ -37,7 +37,7 @@ pub fn get_link_button_text_style() -> TextStyle {
     }
 }
 
-pub fn get_link_button_image_style() -> Style {
+pub fn get_style_link_button_image() -> Style {
     Style {
         width: Val::Px(32.),
         ..default()

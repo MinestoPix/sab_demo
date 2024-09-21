@@ -1,8 +1,8 @@
 use crate::actions::Actions;
 use crate::loading::TextureAssets;
 use crate::style::main_menu::{
-    get_button_style, get_button_text_style, get_link_button_image_style, get_link_button_style,
-    get_link_button_text_style,
+    get_style_button, get_style_button_text, get_style_link_button_image, get_style_link_button,
+    get_style_link_button_text,
 };
 use crate::GameState;
 use bevy::prelude::*;
@@ -68,7 +68,7 @@ impl Default for GameButton {
     fn default() -> Self {
         GameButton {
             button_bundle: ButtonBundle {
-                style: get_button_style(),
+                style: get_style_button(),
                 background_color: ButtonColors::default().normal.into(),
                 ..Default::default()
             },
@@ -86,7 +86,7 @@ impl Default for LinkButton {
     fn default() -> Self {
         LinkButton {
             button_bundle: ButtonBundle {
-                style: get_link_button_style(),
+                style: get_style_link_button(),
                 background_color: Color::NONE.into(),
                 ..Default::default()
             },
@@ -117,11 +117,11 @@ fn spawn_link_children_txt_img(
     children.spawn(link_button).with_children(|parent| {
         parent.spawn(TextBundle::from_section(
             link_text,
-            get_link_button_text_style(),
+            get_style_link_button_text(),
         ));
         parent.spawn(ImageBundle {
             image: img_handle.into(),
-            style: get_link_button_image_style(),
+            style: get_style_link_button_image(),
             ..default()
         });
     });
@@ -148,7 +148,7 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
             children
                 .spawn(GameButton::default())
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section("Play", get_button_text_style()));
+                    parent.spawn(TextBundle::from_section("Play", get_style_button_text()));
                 });
         });
     commands
