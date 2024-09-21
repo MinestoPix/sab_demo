@@ -28,7 +28,7 @@ impl GameControl {
                 keyboard_input.just_pressed(KeyCode::Enter) || keyboard_input.just_pressed(KeyCode::KeyE)
             },
             GameControl::Exit => {
-                keyboard_input.pressed(KeyCode::KeyQ) || keyboard_input.pressed(KeyCode::Escape)
+                keyboard_input.just_pressed(KeyCode::KeyQ) || keyboard_input.just_pressed(KeyCode::Escape)
             },
         }
     }
