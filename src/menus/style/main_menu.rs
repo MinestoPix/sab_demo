@@ -2,10 +2,12 @@ use bevy::prelude::*;
 
 pub fn get_style_button() -> Style {
     Style {
-        width: Val::Px(140.0),
-        height: Val::Px(50.0),
+        min_width: Val::Px(140.0),
+        min_height: Val::Px(50.0),
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
+        margin: UiRect::all(Val::Px(5.)),
+        padding: UiRect::all(Val::Px(5.)),
         ..Default::default()
     }
 }

@@ -1,20 +1,19 @@
 use crate::actions::Actions;
 use crate::loading::TextureAssets;
-use crate::style::main_menu::{
-    get_style_button, get_style_button_text, get_style_link_button_image, get_style_link_button,
+use super::style::main_menu::{
+    get_style_button, get_style_button_text, get_style_link_button, get_style_link_button_image,
     get_style_link_button_text,
 };
 use crate::GameState;
 use bevy::prelude::*;
 
-pub struct MenuPlugin;
+pub(super) struct MainMenuPlugin;
 
 /// This plugin is responsible for the game menu (containing only one button...)
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
-impl Plugin for MenuPlugin {
+impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_camera)
-            .add_systems(OnEnter(GameState::Menu), setup_menu)
+        app.add_systems(OnEnter(GameState::Menu), setup_menu)
             .add_systems(
                 Update,
                 (
@@ -78,10 +77,6 @@ impl Default for GameButton {
     }
 }
 
-fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
-}
-
 impl Default for LinkButton {
     fn default() -> Self {
         LinkButton {
@@ -108,25 +103,6 @@ impl LinkButton {
     }
 }
 
-fn spawn_link_children_txt_img(
-    children: &mut ChildBuilder<'_>,
-    link_button: LinkButton,
-    link_text: &str,
-    img_handle: Handle<Image>,
-) {
-    children.spawn(link_button).with_children(|parent| {
-        parent.spawn(TextBundle::from_section(
-            link_text,
-            get_style_link_button_text(),
-        ));
-        parent.spawn(ImageBundle {
-            image: img_handle.into(),
-            style: get_style_link_button_image(),
-            ..default()
-        });
-    });
-}
-
 fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
     info!("menu");
     commands
@@ -149,6 +125,17 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                 .spawn(GameButton::default())
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section("Play", get_style_button_text()));
+                });
+            children
+                .spawn(GameButton {
+                    change_state: ChangeState(GameState::MapGeneration),
+                    ..GameButton::default()
+                })
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "Generate Map",
+                        get_style_button_text(),
+                    ));
                 });
         });
     commands
@@ -217,14 +204,33 @@ fn click_play_button(
     }
 }
 
-fn cleanup_menu(mut commands: Commands, menu: Query<Entity, With<Menu>>) {
-    for entity in menu.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-}
-
 fn play_on_confirm(mut state: ResMut<NextState<GameState>>, actions: Res<Actions>) {
     if actions.confirm {
         state.set(GameState::Playing);
+    }
+}
+
+fn spawn_link_children_txt_img(
+    children: &mut ChildBuilder<'_>,
+    link_button: LinkButton,
+    link_text: &str,
+    img_handle: Handle<Image>,
+) {
+    children.spawn(link_button).with_children(|parent| {
+        parent.spawn(TextBundle::from_section(
+            link_text,
+            get_style_link_button_text(),
+        ));
+        parent.spawn(ImageBundle {
+            image: img_handle.into(),
+            style: get_style_link_button_image(),
+            ..default()
+        });
+    });
+}
+
+fn cleanup_menu(mut commands: Commands, menu: Query<Entity, With<Menu>>) {
+    for entity in menu.iter() {
+        commands.entity(entity).despawn_recursive();
     }
 }

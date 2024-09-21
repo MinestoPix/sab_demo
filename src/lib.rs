@@ -2,16 +2,16 @@
 
 mod actions;
 mod audio;
-mod loading;
-mod menu;
-mod player;
 mod debug;
+mod loading;
+mod menus;
+mod player;
 mod style;
 
 use crate::actions::ActionsPlugin;
 use crate::audio::InternalAudioPlugin;
 use crate::loading::LoadingPlugin;
-use crate::menu::MenuPlugin;
+use crate::menus::MenuPlugin;
 use crate::player::PlayerPlugin;
 
 use bevy::app::App;
@@ -49,7 +49,11 @@ impl Plugin for GamePlugin {
 
         #[cfg(debug_assertions)]
         {
-            app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default(), DebugPlugin));
+            app.add_plugins((
+                FrameTimeDiagnosticsPlugin,
+                LogDiagnosticsPlugin::default(),
+                DebugPlugin,
+            ));
         }
     }
 }
