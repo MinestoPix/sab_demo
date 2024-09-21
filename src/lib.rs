@@ -6,6 +6,7 @@ mod loading;
 mod menu;
 mod player;
 mod debug;
+mod style;
 
 use crate::actions::ActionsPlugin;
 use crate::audio::InternalAudioPlugin;

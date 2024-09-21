@@ -1,5 +1,6 @@
 use crate::actions::Actions;
 use crate::loading::TextureAssets;
+use crate::style::main_menu::{get_button_style, get_button_text_style};
 use crate::GameState;
 use bevy::prelude::*;
 
@@ -39,6 +40,33 @@ impl Default for ButtonColors {
 #[derive(Component)]
 struct Menu;
 
+#[derive(Component)]
+struct ChangeState(GameState);
+
+#[derive(Component)]
+struct OpenLink(&'static str);
+
+#[derive(Bundle)]
+struct GameButton {
+    button_bundle: ButtonBundle,
+    button_colors: ButtonColors,
+    change_state: ChangeState,
+}
+
+impl Default for GameButton {
+    fn default() -> Self {
+        GameButton {
+            button_bundle: ButtonBundle {
+                style: get_button_style(),
+                background_color: ButtonColors::default().normal.into(),
+                ..Default::default()
+            },
+            button_colors: ButtonColors::default(),
+            change_state: ChangeState(GameState::Playing),
+        }
+    }
+}
+
 fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
     info!("menu");
     commands.spawn(Camera2dBundle::default());
@@ -58,32 +86,10 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
             Menu,
         ))
         .with_children(|children| {
-            let button_colors = ButtonColors::default();
             children
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(140.0),
-                            height: Val::Px(50.0),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            ..Default::default()
-                        },
-                        background_color: button_colors.normal.into(),
-                        ..Default::default()
-                    },
-                    button_colors,
-                    ChangeState(GameState::Playing),
-                ))
+                .spawn(GameButton::default())
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Play",
-                        TextStyle {
-                            font_size: 40.0,
-                            color: Color::linear_rgb(0.9, 0.9, 0.9),
-                            ..default()
-                        },
-                    ));
+                    parent.spawn(TextBundle::from_section("Play", get_button_text_style()));
                 });
         });
     commands
@@ -181,12 +187,6 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                 });
         });
 }
-
-#[derive(Component)]
-struct ChangeState(GameState);
-
-#[derive(Component)]
-struct OpenLink(&'static str);
 
 fn click_play_button(
     mut next_state: ResMut<NextState<GameState>>,
