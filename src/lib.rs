@@ -32,6 +32,7 @@ enum GameState {
     Playing,
     // Here the menu is drawn and waiting for player interaction
     Menu,
+    MapGeneration,
 }
 
 pub struct GamePlugin;

@@ -6,9 +6,14 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (back_to_menu.run_if(in_state(GameState::Playing)),
-            exit_app.run_if(in_state(GameState::Menu))
-        ));
+        app.add_systems(
+            Update,
+            (
+                back_to_menu.run_if(in_state(GameState::Playing)),
+                back_to_menu.run_if(in_state(GameState::MapGeneration)),
+                exit_app.run_if(in_state(GameState::Menu)),
+            ),
+        );
     }
 }
 
