@@ -10,7 +10,8 @@ pub struct MenuPlugin;
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
+        app.add_systems(Startup, setup_camera)
+            .add_systems(OnEnter(GameState::Menu), setup_menu)
             .add_systems(
                 Update,
                 (
@@ -67,9 +68,12 @@ impl Default for GameButton {
     }
 }
 
+fn setup_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
 fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
     info!("menu");
-    commands.spawn(Camera2dBundle::default());
     commands
         .spawn((
             NodeBundle {
