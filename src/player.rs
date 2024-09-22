@@ -28,6 +28,7 @@ fn spawn_player(mut commands: Commands, textures: Res<TextureAssets>) {
         .insert(Player);
 }
 
+#[allow(dead_code)]
 fn despawn_player(mut commands: Commands, query: Query<Entity, With<Player>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
@@ -40,14 +41,17 @@ fn hide_player(mut commands: Commands, query: Query<Entity, With<Player>>) {
     }
 }
 
-
 fn show_player(mut commands: Commands, query: Query<Entity, With<Player>>) {
     for entity in query.iter() {
         commands.entity(entity).insert(Visibility::Visible);
     }
 }
 
-fn spawn_or_show_player(commands: Commands, query: Query<Entity, With<Player>>, textures: Res<TextureAssets>) {
+fn spawn_or_show_player(
+    commands: Commands,
+    query: Query<Entity, With<Player>>,
+    textures: Res<TextureAssets>,
+) {
     if query.iter().next().is_none() {
         spawn_player(commands, textures);
     } else {
