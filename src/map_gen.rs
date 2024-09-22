@@ -9,19 +9,37 @@ use simdnoise::NoiseBuilder;
 
 use crate::GameState;
 
+const CHUNK_SIZE: u16 = 128;
+
 pub struct MapGenPlugin;
 
 impl Plugin for MapGenPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::MapGeneration), setup_map_gen)
+        app.init_resource::<MapGenSettings>()
+            .add_systems(OnEnter(GameState::MapGeneration), setup_map_gen)
             .add_systems(OnExit(GameState::MapGeneration), cleanup_map_gen);
     }
+}
+
+#[derive(Resource)]
+pub struct MapGenSettings {
+    pub val_offset: f32,
+    pub val_multiplier: f32,
 }
 
 #[derive(Component)]
 struct MapGenDisplay;
 
-fn generate_map(x_offset: f32, y_offset: f32) -> Image {
+impl Default for MapGenSettings {
+    fn default() -> Self {
+        Self {
+            val_offset: 0.0,
+            val_multiplier: 1.0,
+        }
+    }
+}
+
+fn generate_map(x_offset: f32, y_offset: f32, val_offset: f32, val_multiplier: f32) -> Image {
     let width = 128;
     let height = 128;
     let noise = NoiseBuilder::fbm_2d_offset(x_offset, width, y_offset, height)
@@ -32,7 +50,7 @@ fn generate_map(x_offset: f32, y_offset: f32) -> Image {
         .0
         .iter()
         .flat_map(|&v| {
-            let v = ((v + 0.5) * 255. / 4.) as u8;
+            let v = ((v + val_offset) * 255. * val_multiplier) as u8;
             vec![v, v, v, 255]
         })
         .collect::<Vec<u8>>();
@@ -53,27 +71,82 @@ fn generate_map(x_offset: f32, y_offset: f32) -> Image {
     )
 }
 
-fn setup_map_gen(mut commands: Commands, mut textures: ResMut<Assets<Image>>) {
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform::default(),
-            texture: textures.add(generate_map(0., 0.)),
-            ..default()
-        },
-        MapGenDisplay,
-    ));
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform::from_translation(Vec3 {
-                x: 0.0,
-                y: 128.0,
-                z: 0.0,
-            }),
-            texture: textures.add(generate_map(0., -128.)),
-            ..default()
-        },
-        MapGenDisplay,
-    ));
+fn setup_map_gen(
+    mut commands: Commands,
+    mut textures: ResMut<Assets<Image>>,
+    window: Query<&Window>,
+    map_gen_settings: Res<MapGenSettings>,
+) {
+    let window = window.single();
+    let width = window.resolution.width() / CHUNK_SIZE as f32;
+    let height = window.resolution.height() / CHUNK_SIZE as f32;
+    let max_length = (width.max(height) + 0.5).round() as i32;
+    let max_length = max_length - 2; // debug
+    let val_offset = map_gen_settings.val_offset;
+    let val_multiplier = map_gen_settings.val_multiplier;
+    commands
+        .spawn((MapGenDisplay, SpatialBundle::default()))
+        .with_children(|parent| {
+            for (x, y) in generate_spiral_max(max_length) {
+                parent.spawn((SpriteBundle {
+                    transform: Transform::from_translation(Vec3 {
+                        x: x as f32 * 128.0,
+                        y: -y as f32 * 128.0,
+                        z: 0.0,
+                    }),
+                    texture: textures.add(generate_map(
+                        x as f32 * 128.0,
+                        y as f32 * 128.0,
+                        val_offset,
+                        val_multiplier,
+                    )),
+                    ..default()
+                },));
+            }
+        });
+}
+
+#[allow(dead_code)]
+fn generate_spiral() -> impl Iterator<Item = (i32, i32)> {
+    // generate tuples starting at center (0, 0), going up and counter-clockwise, then up again
+    let mut x = 0;
+    let mut y = 0;
+    let mut dx = 0;
+    let mut dy = -1;
+    std::iter::from_fn(move || {
+        let result = (x, y);
+        if x == y || (x < 0 && x == -y) || (x > 0 && x == 1 - y) {
+            let temp = dx;
+            dx = -dy;
+            dy = temp;
+        }
+        x += dx;
+        y += dy;
+        Some(result)
+    })
+}
+
+fn generate_spiral_max(max_length: i32) -> impl Iterator<Item = (i32, i32)> {
+    let mut x: i32 = 0;
+    let mut y: i32 = 0;
+    let mut dx = 0;
+    let mut dy = -1;
+    let max_radius = max_length / 2;
+    std::iter::from_fn(move || {
+        // checking if -x is greater than max_radius should suffice
+        if x.abs() > max_radius || y.abs() > max_radius {
+            return None;
+        }
+        let result = (x, y);
+        if x == y || (x < 0 && x == -y) || (x > 0 && x == 1 - y) {
+            let temp = dx;
+            dx = -dy;
+            dy = temp;
+        }
+        x += dx;
+        y += dy;
+        Some(result)
+    })
 }
 
 fn cleanup_map_gen(mut commands: Commands, query: Query<Entity, With<MapGenDisplay>>) {
