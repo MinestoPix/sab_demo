@@ -28,6 +28,7 @@ struct MapGenAction {
     action: fn(&mut Commands),
 }
 
+#[allow(dead_code)]
 pub fn get_style_button() -> Style {
     Style {
         min_width: Val::Px(140.0),
