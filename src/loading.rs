@@ -12,7 +12,9 @@ impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
         app.add_loading_state(
             LoadingState::new(GameState::Loading)
-                .continue_to_state(GameState::Menu)
+                // .continue_to_state(GameState::Menu)
+                // DEBUG: skip menu
+                .continue_to_state(GameState::MapGeneration)
                 .load_collection::<AudioAssets>()
                 .load_collection::<TextureAssets>(),
         );
